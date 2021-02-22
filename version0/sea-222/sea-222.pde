@@ -17,11 +17,11 @@ const int SpiEn = 5;     //26
 const int LockDet = 6;   //4
 const int AdcCsOut = 7;  //8
 const int PttIn = 10;    //36
-const int MOSI = 11;     //32
-const int MISO = 12;     //31
-//const int SCK = 13;      //33  
+const int MOSILOCAL = 11;     //32
+const int MISOLOCAL = 12;     //31
+//const int SCKLOCAL = 13;      //33  
 const int U3SW = 9;
-const int SCK = 8;      //33 moved from 13 to 8 as 13 has the led
+const int SCKLOCAL = 8;      //33 moved from 13 to 8 as 13 has the led
 const int LED = 13;
 const int TRUE = 1;
 const int FALSE = 0;
@@ -71,9 +71,9 @@ void setup() {
   pinMode(LockDet, INPUT);
   pinMode(AdcCsOut, OUTPUT);
   pinMode(PttIn, INPUT);
-  pinMode(SCK, OUTPUT);
-  pinMode(MOSI, OUTPUT);
-  pinMode(MISO, INPUT);
+  pinMode(SCKLOCAL, OUTPUT);
+  pinMode(MOSILOCAL, OUTPUT);
+  pinMode(MISOLOCAL, INPUT);
   pinMode(U3SW, OUTPUT);
   //turn on radio -- U3SW is ON if the radio is ON.
   //could be tied high with a resistor (I suppose) if
@@ -228,11 +228,11 @@ void load_freq() {
 
   //shift in R, N, A on the SPI ports
   //quick and dirty shift out for 222.100, I think...
-  //shiftOut(MOSI, SCK, MSBFIRST, 0);
+  //shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, 0);
   digitalWrite(SpiEn, 1);
-  shiftOut(MOSI, SCK, MSBFIRST, 0);
-  shiftOut(MOSI, SCK, MSBFIRST, 16);
-  shiftOut(MOSI, SCK, MSBFIRST, 15);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, 0);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, 16);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, 15);
   Serial.println("BOUNCE");
   //delay(1000);
   digitalWrite(A_0, 0);
@@ -244,9 +244,9 @@ void load_freq() {
   //resetU4();
   //digitalWrite(SpiEn, 1);
   //delay(100);
-  shiftOut(MOSI, SCK, MSBFIRST, 2);
-  shiftOut(MOSI, SCK, MSBFIRST, 213);
-  shiftOut(MOSI, SCK, MSBFIRST, 150);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, 2);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, 213);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, 150);
   Serial.println("BOUNCE");
   //delay(100);
   digitalWrite(A_0, 0);
@@ -268,7 +268,7 @@ void load_freq() {
 void rx_mode() {
   Serial.println("rx_mode");
   //set the CD4066 in the DSP latch to receive
-  shiftOut(MOSI, SCK, MSBFIRST, 5);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, 5);
   digitalWrite(A_0, 0);
   digitalWrite(A_1, 0);
   digitalWrite(A_2, 1);
@@ -293,7 +293,7 @@ void tx_mode() {
   setDAC(39, 35, 38, 43);
   //setDAC(41, 63, 39, 44);
   //DSP latch to transmit
-  shiftOut(MOSI, SCK, MSBFIRST, 0);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, 0);
   digitalWrite(A_0, 0);
   digitalWrite(A_1, 0);
   digitalWrite(A_2, 1);
@@ -301,7 +301,7 @@ void tx_mode() {
   //main latch to unsquelch (maybe)
   //main latch to TX
   digitalWrite(SpiEn, 1);
-  shiftOut(MOSI, SCK, MSBFIRST, 128);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, 128);
   digitalWrite(A_0, 1);
   digitalWrite(A_1, 1);
   digitalWrite(A_2, 1);
@@ -321,7 +321,7 @@ void tx_mode() {
   //before return:
   //main latch to RX
   digitalWrite(SpiEn, 1);
-  shiftOut(MOSI, SCK, MSBFIRST, 36);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, 36);
   digitalWrite(A_0, 1);
   digitalWrite(A_1, 1);
   digitalWrite(A_2, 1);
@@ -354,7 +354,7 @@ void squelch(int state) {
     //open squelch, rx on
     //SPI.transfer(0x24);
     digitalWrite(SpiEn, 1);
-    shiftOut(MOSI, SCK, MSBFIRST, 32);
+    shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, 32);
     //this a1, a2, a0 sequence chosen to not overlap with other
     //possible output states of U4 that don't require SpiEn
     //strange that the a1 a2 a0 ordering causes the radio to tx
@@ -368,7 +368,7 @@ void squelch(int state) {
     //close squelch, rx off
     //SPI.transfer(0x20);
     digitalWrite(SpiEn, 1);
-    shiftOut(MOSI, SCK, MSBFIRST, 36);
+    shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, 36);
     digitalWrite(A_0, 1);
     digitalWrite(A_1, 1);
     digitalWrite(A_2, 1);
@@ -405,14 +405,14 @@ int readFrontPanel () {
   int foo;
   resetU4();
   //enable the in-latch, U13 which is a 74HC165
-  //read the data on MISO on each clock
+  //read the data on MISOLOCAL on each clock
   //this is basically the latch
   digitalWrite(A_0, 1);
   digitalWrite(A_1, 0);
   digitalWrite(A_2, 0);
   digitalWrite(SpiEn, 0);
 
-  foo = shiftIn(MISO, SCK, MSBFIRST);
+  foo = shiftIn(MISOLOCAL, SCKLOCAL, MSBFIRST);
   resetU4();
   foo = foo ^ 255;
 
@@ -470,7 +470,7 @@ void setFrontPanel(byte light, int state) {
     FPstate &= ~light;
   } //false
   Serial.println(FPstate,BIN);
-  shiftOut(MOSI, SCK, MSBFIRST, FPstate);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, FPstate);
   setU4(FrontPanel);
   resetU4();
 
@@ -588,9 +588,9 @@ void setDAC(byte D, byte C, byte B, byte A) {
   delay(100);
   digitalWrite(SpiEn, 1);
   delay(100);
-  shiftOut(MOSI, SCK, MSBFIRST, X);
-  shiftOut(MOSI, SCK, MSBFIRST, Y);
-  shiftOut(MOSI, SCK, MSBFIRST, Z);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, X);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, Y);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, Z);
   delay(100);
   resetU4();
   delay(100);
