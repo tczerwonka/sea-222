@@ -27,3 +27,4 @@ const int BEEP = A0;     	//9
 const int CW = A2;  		//clockwise switch -- 6
 const int CCW = A1; 		//counterclockwise switch -- 5
 
+#endif
