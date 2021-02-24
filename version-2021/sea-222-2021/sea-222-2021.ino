@@ -151,6 +151,11 @@ void load_frequency(unsigned long frequency) {
   //N: 694
   //A: 4
 
+  //this could all be condensed in a few statements and potentially
+  //simplified but when I look at this (again) in ten years it's less
+  //likely that I'll curse the long description than a summary
+  //my view is the MSB is on the "left"
+
   //At this point we have R, N, A -- need to load into the PLL
   //R is 14 bits -- put one for control at LSB -- total of 15 bits 
   //A and N are 17 bits together, 7 bits for A, 10 bits for N
@@ -158,6 +163,16 @@ void load_frequency(unsigned long frequency) {
   //now shift out in 3 16-bit ints -- shift must go MSB first
   //shiftOut works on bytes -- something like this needs to be done
   //shiftOut(dataPin, clock, MSBFIRST, (data >> 8));
+  
+  //ideal
+  //RRRRRRRRRRRRRRC NNNNNNNNNNAAAAAAAC
+  //M            L1 M        LM     L0
+  // S            S  S        SS     S
+  //  B            B  B        BB     B
+ 
+  //OH I SUPPOSE
+  //RRRRRRRRRRRRRR1 EN 000000NN NNNNNNNNAAAAAAA0 EN
+  //-------R-------    ---MM--- -------NN-------
 
   Serial.print("R: 0x");
   sprintf( szStr, "%X", R );
@@ -175,43 +190,47 @@ void load_frequency(unsigned long frequency) {
   //0x100E -> 0x100f
   //0b1000000001110 -> 0b1000000001111 ---- looks right
 
-  //N needs to shift up 8
+
+  //need two MSB bits of a 10-bit N in LSB-most position of a unsigned int
+  // e.g. 000000NNNNNNNNNN -> 000000NN + NNNNNNNN00000000
+  // NNNNNNNN--------
+  
+  //   -- make a copy of N, shift down 8 bits as N is only 10 bits
+  unsigned long N_PART;
+  N_PART = N >> 8;
+  //now shift N up 8 bits -- that will roll off the first two and leave the last 8 as zero
+  N = N << 8;
+  //shift A up one bit - LSB becomes control zero
+  A = A << 1;
+  //OR A on lower part of N
+  N = N | A;
+
+  Serial.print("N_PART: 0x");
+  sprintf( szStr, "%X", N_PART );
+  Serial.println( szStr );
+
   Serial.print("N: 0x");
   sprintf( szStr, "%X", N );
   Serial.println( szStr );
-  N = N << 8; //shift left
-  Serial.print("N bsl8: 0x");
-  sprintf( szStr, "%X", N );
-  Serial.println( szStr );
-  //N: 0x2B6
-  //N bsl8: 0xB600
-  //0b1010110110 -> 0b1011011000000000
 
-  //WRONG WRONG -- NA -- total of 17 bits plus another shift
-  Serial.print("A: 0x");
-  sprintf( szStr, "%X", A );
-  Serial.println( szStr );
-  NA = N | A; // OR the two together
-  Serial.print("NA: 0x");
-  sprintf( szStr, "%X", NA );
-  Serial.println( szStr );
-  NA = NA << 1; // should OR in a 0 at LSB but that's assumed here
-  Serial.print("NA bsl: 0x");
-  sprintf( szStr, "%X", NA );
-  Serial.println( szStr );
-
-
-
-
-  
-
-
+  //desired frequency: 222100000
+  //target frequency: 232375000
+  //R: 2055
+  //N: 694 -- 0x2B6 -- 0b00000010 10110110
+  //A: 4
+  //R: 0x807
+  //R bsl: 0x100E
+  //R OR 1: 0x100F
+  //N_PART: 0x2 -- right -- that's just 0b10
+  //N: 0xB608 -- 0b10110110 0000100 0
 
   //shiftOut(dataPin, clock, MSBFIRST, R);
   //shiftOut(dataPin, clock, MSBFIRST, (R >> 8));
-  //shiftOut(dataPin, clock, MSBFIRST, NA);
-  //shiftOut(dataPin, clock, MSBFIRST, (NA >> 8));
-
+  //now toggle ENABLE
+  //shiftOut(dataPin, clock, MSBFIRST, N_PART);
+  //shiftOut(dataPin, clock, MSBFIRST, N);
+  //shiftOut(dataPin, clock, MSBFIRST, (N >> 8));
+  //now toggle ENABLE
 
 
   
