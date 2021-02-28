@@ -18,11 +18,21 @@
 
 char szStr[20];
 
+
+
+//function prototypes
+void radio_enable(int power_state);
+void load_frequency(unsigned long frequency);
+void U4_control(int u4control);
+
+
+
 //initial values for the PLL -- all values in Hz
 unsigned long l_frequency = 222100000; 
 unsigned long l_step = 5000;
 unsigned long l_reference_oscillator = 10275000;
 int modulus = 64; //fixed on this PLL
+
 
 void setup() {
   Serial.begin(9600);
@@ -104,8 +114,6 @@ void load_frequency(unsigned long frequency) {
   Serial.print("load_frequency: ");
   Serial.println(frequency);
 
-  unsigned long NA;
-  
   //Serial.print("desired frequency: ");
   //sprintf( szStr, "%09lu", l_frequency );
   //Serial.println( szStr );
@@ -271,12 +279,15 @@ void rx_mode() {
 
 ////////////////////////////////////////////////////////////////////////////////
 // in_latch
-//   in_latch is U13, a 74HC185D - controlled by U4_control(IN_LATCH)
+//   in_latch is U13, a 74HC165D - controlled by U4_control(IN_LATCH)
+//   74HC165D is a 8-bit parallel in / serial-out shift register
 ////////////////////////////////////////////////////////////////////////////////
-in_latch(int in_latch) {
-  case MON:
-  U4_control(IN_LATCH);
-  U4_control(RESET);
+void in_latch(int in_latchvar) {
+  switch (in_latchvar) {
+    case MON:
+      U4_control(IN_LATCH);
+      U4_control(RESET);
+  } //switch
 } //in_latch
 
 
