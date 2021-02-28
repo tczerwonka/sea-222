@@ -13,12 +13,12 @@ const int PLL_PGM = 6
 const int MAIN_EN = 7;
 
 /* U13 HC74C185D in_latch */
-const int TA = 2; 	//D0 - A
-const int AUX = 4; 	//D1 - B
-const int CHAN = 8;	//D2 - C
-const int IGN_SENSE = 16;	//D3 - D
-const int TEST = 32;	//D4 - E
-const int ANY_KEY = 64; //D5 - F
-const int MON_SCAN = 128; //D5 - G
+const int TA = 2; 	//D0 - A - 11
+const int AUX = 4; 	//D1 - B - 12
+const int CHAN = 8;	//D2 - C - 13
+const int IGN_SENSE = 16;	//D3 - D - 14
+const int TEST = 32;	//D4 - E - 3
+const int ANY_KEY = 64; //D5 - F - 4
+const int MON_SCAN = 128; //D5 - G - 5
 
 #endif
