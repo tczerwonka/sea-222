@@ -7,6 +7,7 @@
    Project to take the ESP504 radio move it to the US 222 amateur
    band.  The 2022 code (see elsewhere in the project) was minimally
    working but really needs to be completely re-written.
+
    Additionally decent functions for the PLL needed to be written
    then and that's still true today.
    Plus the A register for the PLL is 63/64 and that's it.
@@ -62,8 +63,7 @@ void setup() {
 
   //set frequency to 222.100
   load_frequency(l_frequency);
-  //load_freq();
-  //delay(100);
+  delay(100);
   //set the DAC values
 
   //values appropriate for SN WA2285
@@ -239,21 +239,16 @@ void load_frequency(unsigned long frequency) {
   shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, R);
   shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, (R >> 8));
   //now toggle ENABLE
-  digitalWrite(A_0, 0);
-  digitalWrite(A_1, 1);
-  digitalWrite(A_2, 1);
-  digitalWrite(A_1, 0);
-  digitalWrite(A_2, 0);
+  U4_control(PLL_PGM);
+  U4_control(RESET);
 
   shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, N_PART);
   shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, N);
   shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, (N >> 8));
   //now toggle ENABLE
-  digitalWrite(A_0, 0);
-  digitalWrite(A_1, 1);
-  digitalWrite(A_2, 1);
-  digitalWrite(A_1, 0);
-  digitalWrite(A_2, 0);
+  U4_control(PLL_PGM);
+  U4_control(RESET);
+  digitalWrite(SpiEn, 0);
   
   Serial.println("finished load_frequency");
 } //load_frequency
