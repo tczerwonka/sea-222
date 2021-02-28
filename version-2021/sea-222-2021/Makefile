@@ -1,4 +1,5 @@
 #https://github.com/sudar/Arduino-Makefile/releases
+#https://www.mertl-research.at/ceonwiki/doku.php?id=coding:arduino:devenv_build_process
 BOARD_TAG = uno
 ARDUINO_PORT = /dev/ttyACM0
 ARDUINO_LIBS = 
