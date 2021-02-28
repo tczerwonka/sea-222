@@ -14,6 +14,7 @@
 */
 
 #include "pindefs.h"
+#include "esp_macros.h"
 
 char szStr[20];
 
@@ -100,23 +101,25 @@ void radio_enable(int power_state) {
 //    Frequency input is in hz
 ////////////////////////////////////////////////////////////////////////////////
 void load_frequency(unsigned long frequency) {
+  Serial.print("load_frequency: ");
+  Serial.println(frequency);
 
   unsigned long NA;
   
-  Serial.print("desired frequency: ");
-  sprintf( szStr, "%09lu", l_frequency );
-  Serial.println( szStr );
+  //Serial.print("desired frequency: ");
+  //sprintf( szStr, "%09lu", l_frequency );
+  //Serial.println( szStr );
 
   //calculate target frequency
   unsigned long l_target = l_frequency + l_reference_oscillator;
-  Serial.print("target frequency: ");
-  sprintf( szStr, "%09lu", l_target );
-  Serial.println( szStr );
+  //Serial.print("target frequency: ");
+  //sprintf( szStr, "%09lu", l_target );
+  //Serial.println( szStr );
 
   //R register is reference oscillator divided by desired step
   int R = l_reference_oscillator / l_step;
-  Serial.print("R: ");
-  Serial.println(R);
+  //Serial.print("R: ");
+  //Serial.println(R);
 
   //need to find the N and A
   //l_target / step = some large integer
@@ -124,12 +127,12 @@ void load_frequency(unsigned long frequency) {
   //whole is N, remainder is A
   unsigned long l_divisor = l_frequency / l_step;
   unsigned long N = l_divisor / modulus;
-  Serial.print("N: ");
-  Serial.println(N);
+  //Serial.print("N: ");
+  //Serial.println(N);
 
   unsigned long A = l_divisor - (N * modulus);
-  Serial.print("A: ");
-  Serial.println(A);
+  //Serial.print("A: ");
+  //Serial.println(A);
 
   //R range -- 3 to 16383
   //N range -- 3 to 1023
@@ -174,19 +177,19 @@ void load_frequency(unsigned long frequency) {
   //RRRRRRRRRRRRRR1 EN 000000NN NNNNNNNNAAAAAAA0 EN
   //-------R-------    ---MM--- -------NN-------
 
-  Serial.print("R: 0x");
-  sprintf( szStr, "%X", R );
-  Serial.println( szStr );
+  //Serial.print("R: 0x");
+  //sprintf( szStr, "%X", R );
+  //Serial.println( szStr );
   R = R << 1; //shift left
-  Serial.print("R bsl: 0x");
-  sprintf( szStr, "%X", R );
-  Serial.println( szStr );
+  //Serial.print("R bsl: 0x");
+  //sprintf( szStr, "%X", R );
+  //Serial.println( szStr );
   //2055d -> 0x807 -> 0x100E
   //0b100000000111 -> 0b1000000001110
   R = R | 1; // OR the one at the LSB?
-  Serial.print("R OR 1: 0x");
-  sprintf( szStr, "%X", R );
-  Serial.println( szStr );
+  //Serial.print("R OR 1: 0x");
+  //sprintf( szStr, "%X", R );
+  //Serial.println( szStr );
   //0x100E -> 0x100f
   //0b1000000001110 -> 0b1000000001111 ---- looks right
 
@@ -205,13 +208,13 @@ void load_frequency(unsigned long frequency) {
   //OR A on lower part of N
   N = N | A;
 
-  Serial.print("N_PART: 0x");
-  sprintf( szStr, "%X", N_PART );
-  Serial.println( szStr );
+  //Serial.print("N_PART: 0x");
+  //sprintf( szStr, "%X", N_PART );
+  //Serial.println( szStr );
 
-  Serial.print("N: 0x");
-  sprintf( szStr, "%X", N );
-  Serial.println( szStr );
+  //Serial.print("N: 0x");
+  //sprintf( szStr, "%X", N );
+  //Serial.println( szStr );
 
   //desired frequency: 222100000
   //target frequency: 232375000
@@ -224,15 +227,127 @@ void load_frequency(unsigned long frequency) {
   //N_PART: 0x2 -- right -- that's just 0b10
   //N: 0xB608 -- 0b10110110 0000100 0
 
-  //shiftOut(dataPin, clock, MSBFIRST, R);
-  //shiftOut(dataPin, clock, MSBFIRST, (R >> 8));
+  digitalWrite(SpiEn, 1);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, R);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, (R >> 8));
   //now toggle ENABLE
-  //shiftOut(dataPin, clock, MSBFIRST, N_PART);
-  //shiftOut(dataPin, clock, MSBFIRST, N);
-  //shiftOut(dataPin, clock, MSBFIRST, (N >> 8));
+  digitalWrite(A_0, 0);
+  digitalWrite(A_1, 1);
+  digitalWrite(A_2, 1);
+  digitalWrite(A_1, 0);
+  digitalWrite(A_2, 0);
+
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, N_PART);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, N);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, (N >> 8));
   //now toggle ENABLE
-
-
+  digitalWrite(A_0, 0);
+  digitalWrite(A_1, 1);
+  digitalWrite(A_2, 1);
+  digitalWrite(A_1, 0);
+  digitalWrite(A_2, 0);
   
-  
+  Serial.println("finished load_frequency");
 } //load_frequency
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// rx_mode
+//   anything needed to receive
+////////////////////////////////////////////////////////////////////////////////
+void rx_mode() {
+  Serial.println("rx_mode");
+  //set the CD4066 (U3-D) in the DSP latch to receive
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, 5);
+  U4_control(IN_LATCH);
+  U4_control(RESET);
+
+  return;
+}
+
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// in_latch
+//   in_latch is U13, a 74HC185D - controlled by U4_control(IN_LATCH)
+////////////////////////////////////////////////////////////////////////////////
+in_latch(int in_latch) {
+  case MON:
+  U4_control(IN_LATCH);
+  U4_control(RESET);
+} //in_latch
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// U4_control()
+//   code to control U4, a HC259 3-to-8 strobe and latch enable decoder
+////////////////////////////////////////////////////////////////////////////////
+void U4_control(int u4control) {
+  switch (u4control) {
+  case RESET:
+    digitalWrite(SpiEn, 0);
+    digitalWrite(A_2, 0);
+    digitalWrite(A_1, 0);
+    digitalWrite(A_0, 0);
+    Serial.println("U4 RESET");
+    break;
+  //IN_LATCH is U13 74HC185D - this sets
+  //  U3-D CD4066
+  //  "in-latch" -- things like chan, aux, mon, TA, any_key, ign_sense, TEST
+  case IN_LATCH:
+    digitalWrite(SpiEn, 0);
+    digitalWrite(A_2, 0);
+    digitalWrite(A_1, 0);
+    digitalWrite(A_0, 1);
+    Serial.println("U4 IN_LATCH");
+    break;
+  //LED_EN
+  //   LED and DTMF enable
+  case LED_EN:
+    digitalWrite(SpiEn, 0);
+    digitalWrite(A_2, 0);
+    digitalWrite(A_1, 1);
+    digitalWrite(A_0, 1);
+    Serial.println("U4 LED_EN");
+    break;
+  //DSP_LATCH CD4066
+  //  
+  case DSP_LATCH:
+    digitalWrite(SpiEn, 0);
+    digitalWrite(A_2, 1);
+    digitalWrite(A_1, 0);
+    digitalWrite(A_0, 0);
+    Serial.println("U4 DSP_LATCH");
+    break;
+  case DAC_EN:
+    digitalWrite(SpiEn, 1);
+    digitalWrite(A_2, 1);
+    digitalWrite(A_1, 0);
+    digitalWrite(A_0, 1);
+    Serial.println("U4 DAC_EN");
+    break;
+  case PLL_PGM:
+    digitalWrite(SpiEn, 1);
+    digitalWrite(A_2, 1);
+    digitalWrite(A_1, 1);
+    digitalWrite(A_0, 0);
+    Serial.println("U4 PLL_PGM");
+    break;
+  case MAIN_EN:
+    digitalWrite(SpiEn, 1);
+    digitalWrite(A_2, 1);
+    digitalWrite(A_1, 1);
+    digitalWrite(A_0, 1);
+    Serial.println("U4 MAIN_EN");
+    break;
+  default:
+    Serial.println("U4 ...lol wut?");
+    break;
+  }
+} //U4_control
+
+
+
