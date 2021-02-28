@@ -20,6 +20,7 @@ const int MISOLOCAL = 12;     	//31
 const int U3SW = 9;
 const int SCKLOCAL = 8;      	//33 moved from 13 to 8 as 13 has the led
 const int LED = 13;
+
 const int TRUE = 1;
 const int FALSE = 0;
 
