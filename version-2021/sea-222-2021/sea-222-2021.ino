@@ -5,7 +5,7 @@
    https://github.com/tczerwonka/sea-222
 
    Project to take the ESP504 radio move it to the US 222 amateur
-   band.  The 2022 code (see elsewhere in the project) was minimally
+   band.  The 2011 code (see elsewhere in the project) was minimally
    working but really needs to be completely re-written.
 
    Additionally decent functions for the PLL needed to be written
@@ -25,7 +25,8 @@ char szStr[20];
 void radio_enable(int power_state);
 void load_frequency(unsigned long frequency);
 void U4_control(int u4control);
-
+int readFrontPanel(void);
+void beep (int freq, int duration);
 
 
 //initial values for the PLL -- all values in Hz
@@ -62,29 +63,24 @@ void setup() {
   radio_enable(1);
 
   //set frequency to 222.100
-  load_frequency(l_frequency);
+  //load_frequency(l_frequency);
   delay(100);
   //set the DAC values
 
   //values appropriate for SN WA2285
   //setDAC(60, 35, 38, 43);
 
-  //delay(100);
+  delay(100);
   //wow this works!
-  //beep(1000, 150);
-  //beep(1500, 100);
+  beep(1000, 150);
+  beep(1500, 100);
 
 
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  delay(500);
-  l_frequency += 5000;
-  //load_frequency(l_frequency);
-
-  Serial.println("X");
-
+  int incomingByte = readFrontPanel();
+  delay(1000);
 }
 
 
@@ -304,10 +300,10 @@ void U4_control(int u4control) {
   //  U3-D CD4066
   //  "in-latch" -- things like chan, aux, mon, TA, any_key, ign_sense, TEST
   case IN_LATCH:
-    digitalWrite(SpiEn, 0);
-    digitalWrite(A_2, 0);
-    digitalWrite(A_1, 0);
     digitalWrite(A_0, 1);
+    digitalWrite(A_1, 0);
+    digitalWrite(A_2, 0);
+    digitalWrite(SpiEn, 0);
     Serial.println("U4 IN_LATCH");
     break;
   //LED_EN
@@ -357,3 +353,66 @@ void U4_control(int u4control) {
 
 
 
+////////////////////////////////////////////////////////////////////////////////
+// beep(frequency, duration in ms)
+//   make square waves!
+////////////////////////////////////////////////////////////////////////////////
+void beep (int freq, int duration) {
+  //1000000 divided by two divided by the frequency is the
+  //number of periods, or so I have convinced myself.
+  int period = 500000 / freq;
+  for (int i = 0; i < duration; i++) {
+    digitalWrite(BEEP, HIGH);
+    delayMicroseconds(period);
+    digitalWrite(BEEP, LOW);
+    delayMicroseconds(period);
+  }
+
+  return;
+}
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// readFrontPanel
+//   read teh state of teh buttons on teh front panel
+////////////////////////////////////////////////////////////////////////////////
+int readFrontPanel() {
+  int foo;
+  //resetU4();
+  U4_control(RESET);
+  //enable the in-latch, U13 which is a 74HC165
+  //read the data on MISOLOCAL on each clock
+  //this is basically the latch
+  delay(10);
+  digitalWrite(A_0, 1);
+  digitalWrite(A_1, 0);
+  digitalWrite(A_2, 0);
+  digitalWrite(SpiEn, 0);
+  delay(10);
+  foo = shiftIn(MISOLOCAL, SCKLOCAL, MSBFIRST);
+  delay(10);
+  U4_control(RESET);
+  //resetU4();
+  foo = foo ^ 255;
+
+
+  Serial.print("readFrontPanel: ");
+  Serial.print(foo);
+  Serial.print("\n\t");
+  if (foo & 2) {
+    Serial.print("HRN ");
+  }
+  if (foo & 4) {
+    Serial.print("PGM ");
+  }
+  if (foo & 8) {
+    Serial.print("AUX ");
+  }
+  if (foo & 128) {
+    Serial.print("SCN ");
+  }
+
+  Serial.println();
+  return foo;
+} //readFrontPanel
