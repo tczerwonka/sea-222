@@ -9,8 +9,10 @@ const int IN_LATCH = 1;
 const int LED_EN = 3;
 const int DSP_LATCH = 4;
 const int DAC_EN = 5;
-const int PLL_PGM = 6
+const int PLL_PGM = 6;
 const int MAIN_EN = 7;
+
+const int MON = 5;
 
 /* U13 HC74C185D in_latch */
 const int TA = 2; 	//D0 - A - 11
