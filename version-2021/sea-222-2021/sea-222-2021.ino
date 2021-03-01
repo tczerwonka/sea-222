@@ -17,26 +17,42 @@
 #include "pindefs.h"
 #include "esp_macros.h"
 
-char szStr[20];
 
 
 
+////////////////////////////////////////////////////////////////////////////////
 //function prototypes
+////////////////////////////////////////////////////////////////////////////////
 void radio_enable(int power_state);
 void load_frequency(unsigned long frequency);
 void U4_control(int u4control);
 int readFrontPanel(void);
 void beep (int freq, int duration);
+void setFrontPanel(byte light, int state);
 
 
+
+////////////////////////////////////////////////////////////////////////////////
 //initial values for the PLL -- all values in Hz
+////////////////////////////////////////////////////////////////////////////////
 unsigned long l_frequency = 222100000; 
 unsigned long l_step = 5000;
 unsigned long l_reference_oscillator = 10275000;
 int modulus = 64; //fixed on this PLL
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// other globals
+////////////////////////////////////////////////////////////////////////////////
+char szStr[20]; 	//for debug printing
 int frontPanelByte;
 
 
+
+////////////////////////////////////////////////////////////////////////////////
+// setup
+////////////////////////////////////////////////////////////////////////////////
 void setup() {
   Serial.begin(9600);
   delay(1000);
@@ -61,7 +77,7 @@ void setup() {
   radio_enable(1);
 
   //set frequency to 222.100
-  //load_frequency(l_frequency);
+  load_frequency(l_frequency);
   delay(100);
   //set the DAC values
 
@@ -69,17 +85,30 @@ void setup() {
   //setDAC(60, 35, 38, 43);
 
   delay(100);
-  //wow this works!
   beep(1000, 150);
   beep(1500, 100);
 
 
 }
 
+
+
+////////////////////////////////////////////////////////////////////////////////
+// loop
+////////////////////////////////////////////////////////////////////////////////
 void loop() {
   frontPanelByte = readFrontPanel();
+  if (frontPanelByte == 128) {
+    //scn
+    setFrontPanel(RNGE, 1);
+  }
+  else {
+    setFrontPanel(RNGE, 0);
+  }
+
+
   delay(1000);
-}
+} //loop
 
 
 
@@ -388,7 +417,7 @@ int readFrontPanel() {
 
   Serial.print("readFrontPanel: ");
   Serial.print(foo);
-  Serial.print("\n\t");
+  Serial.print("\t");
   if (foo & 2) {
     Serial.print("HRN ");
   }
@@ -405,3 +434,44 @@ int readFrontPanel() {
   Serial.println();
   return foo;
 } //readFrontPanel
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+//setFrontPanel
+//    improved function to write to a UCN5821
+//    setFrontPanel(INDICATOR, state);
+//    FPstate holds the current state of the indicator lights
+//    INDICATOR is the light to be activated on
+//    state is 1 for on 0 for off.  Easy.
+//      const byte BLANK = 0;
+//      const byte RNGE = 2;
+//      const byte CALL = 8;
+//      const byte TX = 64
+//      const byte ONE = 4;
+//      const byte TWO = 1;
+//      const byte THREE = 16;
+//      const byte FOUR = 128;
+//      byte FPstate = 0;
+//
+////////////////////////////////////////////////////////////////////////////////
+void setFrontPanel(byte light, int state) {
+  Serial.print("setFrontPanel: ");
+  if (state == TRUE) {
+    Serial.print(" on ");
+    //bitwise or
+    FPstate |= light;
+  }
+  else {
+    Serial.print(" off ");
+    //bitwise and of the not of light
+    FPstate &= ~light;
+  } //false
+  Serial.println(FPstate,BIN);
+  shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, FPstate);
+  U4_control(LED_EN);
+  U4_control(RESET);
+
+  return;
+} //setFrontPanel
+
