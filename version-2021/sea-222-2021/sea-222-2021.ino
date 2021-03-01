@@ -34,11 +34,12 @@ unsigned long l_frequency = 222100000;
 unsigned long l_step = 5000;
 unsigned long l_reference_oscillator = 10275000;
 int modulus = 64; //fixed on this PLL
+int frontPanelByte;
 
 
 void setup() {
   Serial.begin(9600);
-  delay(5000);
+  delay(1000);
   Serial.println("========================================");
   pinMode(A_0, OUTPUT);
   pinMode(A_1, OUTPUT);
@@ -55,9 +56,6 @@ void setup() {
   pinMode(BEEP, OUTPUT);
   pinMode(CW, INPUT);
   pinMode(CCW, INPUT);
-
-
-  load_frequency(l_frequency);
   
   //turn on radio -- U3SW is ON if the radio is ON.
   radio_enable(1);
@@ -79,7 +77,7 @@ void setup() {
 }
 
 void loop() {
-  int incomingByte = readFrontPanel();
+  frontPanelByte = readFrontPanel();
   delay(1000);
 }
 
@@ -375,25 +373,16 @@ void beep (int freq, int duration) {
 
 ////////////////////////////////////////////////////////////////////////////////
 // readFrontPanel
-//   read teh state of teh buttons on teh front panel
+//   read the state of the buttons on the front panel
 ////////////////////////////////////////////////////////////////////////////////
 int readFrontPanel() {
   int foo;
-  //resetU4();
-  U4_control(RESET);
   //enable the in-latch, U13 which is a 74HC165
   //read the data on MISOLOCAL on each clock
-  //this is basically the latch
-  delay(10);
-  digitalWrite(A_0, 1);
-  digitalWrite(A_1, 0);
-  digitalWrite(A_2, 0);
-  digitalWrite(SpiEn, 0);
-  delay(10);
-  foo = shiftIn(MISOLOCAL, SCKLOCAL, MSBFIRST);
-  delay(10);
   U4_control(RESET);
-  //resetU4();
+  U4_control(IN_LATCH);
+  foo = shiftIn(MISOLOCAL, SCKLOCAL, MSBFIRST);
+  U4_control(RESET);
   foo = foo ^ 255;
 
 
