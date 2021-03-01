@@ -29,6 +29,7 @@ void U4_control(int u4control);
 int readFrontPanel(void);
 void beep (int freq, int duration);
 void setFrontPanel(byte light, int state);
+void squelch(int state);
 
 
 
@@ -104,6 +105,15 @@ void loop() {
   }
   else {
     setFrontPanel(RNGE, 0);
+  }
+
+  if (frontPanelByte == 2) {
+    //hrn
+    //testfn();
+    squelch(1);
+  }
+  else {
+    squelch(0);
   }
 
 
@@ -286,7 +296,7 @@ void rx_mode() {
   Serial.println("rx_mode");
   //set the CD4066 (U3-D) in the DSP latch to receive
   shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, 5);
-  U4_control(IN_LATCH);
+  U4_control(DSP_LATCH);
   U4_control(RESET);
 
   return;
@@ -366,10 +376,11 @@ void U4_control(int u4control) {
     Serial.println("U4 PLL_PGM");
     break;
   case MAIN_EN:
-    digitalWrite(SpiEn, 1);
-    digitalWrite(A_2, 1);
-    digitalWrite(A_1, 1);
+    //enables U407, main latch -- U407 is a MC14094B
+    //digitalWrite(SpiEn, 1);
     digitalWrite(A_0, 1);
+    digitalWrite(A_1, 1);
+    digitalWrite(A_2, 1);
     Serial.println("U4 MAIN_EN");
     break;
   default:
@@ -474,4 +485,37 @@ void setFrontPanel(byte light, int state) {
 
   return;
 } //setFrontPanel
+
+
+
+////////////////////////////////////////////////////////////////////////////////
+// squelch
+////////////////////////////////////////////////////////////////////////////////
+void squelch(int state) {
+  Serial.println("in squelch");
+  rx_mode();
+  U4_control(RESET);
+
+  //enable U407 main latch
+  //send via spi d32 and d4 -- d36 is 0x24
+  if (state==1) {
+    Serial.println("\topen squelch\n");
+    //open squelch, rx on
+    //SPI.transfer(0x24);
+    digitalWrite(SpiEn, 1);
+    shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, 32);
+    U4_control(MAIN_EN);
+  }
+  else {
+    Serial.println("\tclose squelch\n");
+    //close squelch, rx off
+    //SPI.transfer(0x20);
+    digitalWrite(SpiEn, 1);
+    shiftOut(MOSILOCAL, SCKLOCAL, MSBFIRST, 36);
+    U4_control(MAIN_EN);
+  }
+
+
+  U4_control(RESET);
+}
 
