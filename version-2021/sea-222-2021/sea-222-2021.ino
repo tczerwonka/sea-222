@@ -43,12 +43,12 @@ unsigned long l_reference_oscillator = 10275000;
 int modulus = 64; //fixed on this PLL
 
 
-
 ////////////////////////////////////////////////////////////////////////////////
 // other globals
 ////////////////////////////////////////////////////////////////////////////////
 char szStr[20]; 	//for debug printing
 int frontPanelByte;
+int LEDstate = 0;
 
 
 
@@ -99,6 +99,15 @@ void setup() {
 // loop
 ////////////////////////////////////////////////////////////////////////////////
 void loop() {
+  //toggle D13 (LED) on every loop
+  if (LEDstate == 0) {
+    digitalWrite(LED, 1);
+    LEDstate = 1;
+  } else {
+    digitalWrite(LED, 0);
+    LEDstate = 0;
+  }
+	
   frontPanelByte = readFrontPanel();
   if (frontPanelByte == 128) {
     //scn
