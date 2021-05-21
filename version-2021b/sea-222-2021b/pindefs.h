@@ -7,6 +7,8 @@
 /* It may be reasonable to use the Arduino SPI library and       */
 /* reassign MISO/MOSI and SCK pins to the hardware intended pins */
 
+//test
+
 const int A_0 = 4;        	//23
 const int A_1 = 3;        	//22
 const int A_2 = 2;        	//21
