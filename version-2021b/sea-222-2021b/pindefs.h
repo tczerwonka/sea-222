@@ -9,9 +9,10 @@
 
 //test
 
-const int A_0 = 4;        	//23
-const int A_1 = 3;        	//22
-const int A_2 = 2;        	//21
+const int A_0 = 4;        	//23 - PC5
+const int A_1 = 3;        	//22 - PC6
+const int A_2 = 2;        	//21 - PC7
+//done to here
 const int SpiEn = 5;     	//26
 const int LockDet = 6;   	//4
 const int AdcCsOut = 7;  	//8
