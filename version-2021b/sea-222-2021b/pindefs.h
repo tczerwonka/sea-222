@@ -12,23 +12,22 @@
 const int A_0 = 4;        	//23 - PC5
 const int A_1 = 3;        	//22 - PC6
 const int A_2 = 2;        	//21 - PC7
-//done to here
-const int SpiEn = 5;     	//26
-const int LockDet = 6;   	//4
-const int AdcCsOut = 7;  	//8
-const int PttIn = 10;    	//36
-const int MOSILOCAL = 11;     	//32
-const int MISOLOCAL = 12;     	//31
-//const int SCKLOCAL = 13; 	//33
-const int U3SW = 9;
-const int SCKLOCAL = 8;      	//33 moved from 13 to 8 as 13 has the led
+const int SCKLOCAL = 7;        //33 moved from 13 to 8 as 13 has the led
+const int MOSILOCAL = 6;       //32
+const int MISOLOCAL = 5;       //31
+const int SpiEn = 8;     	//26
+const int CW = 10;      //clockwise switch -- 6
+const int CCW = 9;    //counterclockwise switch -- 5
+const int LockDet = 11;     //4
+const int AdcCsOut = 12;    //8
 const int LED = 13;
+const int BEEP = 24;      //9
+const int U3SW = 25;       //24
+const int PttIn = 26;      //36
 
-const int TRUE = 1;
-const int FALSE = 0;
 
-const int BEEP = A0;     	//9
-const int CW = A2;  		//clockwise switch -- 6
-const int CCW = A1; 		//counterclockwise switch -- 5
+
+
+
 
 #endif

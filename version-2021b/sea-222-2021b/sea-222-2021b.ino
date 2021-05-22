@@ -99,6 +99,7 @@ void setup() {
 // loop
 ////////////////////////////////////////////////////////////////////////////////
 void loop() {
+  Serial.println("loop start\n==========");
   //toggle D13 (LED) on every loop
   if (LEDstate == 0) {
     digitalWrite(LED, 1);
@@ -603,4 +604,3 @@ void setDAC(byte D, byte C, byte B, byte A) {
   //Serial.print("\n");
   return;
 }
-

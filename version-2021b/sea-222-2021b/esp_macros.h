@@ -2,6 +2,8 @@
 #define ESP_MACROS_H
 
 /* esp_macros.h */
+const int TRUE = 1;
+const int FALSE = 0;
 
 /* U4 HC259 */
 const int RESET = 0;
