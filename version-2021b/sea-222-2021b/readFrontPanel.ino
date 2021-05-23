@@ -8,7 +8,9 @@ int readFrontPanel() {
   //read the data on MISOLOCAL on each clock
   U4_control(RESET);
   U4_control(IN_LATCH);
-  foo = shiftIn(MISOLOCAL, SCKLOCAL, MSBFIRST);
+  //foo = shiftIn(MISOLOCAL, SCKLOCAL, MSBFIRST);
+  foo = my_shiftIn_msbFirst(MISOLOCAL,SCKLOCAL);
+
   foo = foo ^ 255;
   delay(100);
   U4_control(RESET);
