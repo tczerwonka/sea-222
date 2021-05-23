@@ -7,7 +7,7 @@ void setup() {
   pinMode(2, OUTPUT);
   pinMode(8, OUTPUT);
   pinMode(1, INPUT); //miso
-  pinMode(32, OUTPUT); //clock
+  pinMode(5, OUTPUT); //clock
 
   delay(1000);
   //turn on radio
@@ -35,7 +35,7 @@ void loop() {
   //delayMicroseconds(10000);
 
 
-  foo = shiftIn(1, 32, MSBFIRST);
+  foo = shiftIn(1, 5, MSBFIRST);
   //foo = my_shiftIn_msbFirst(1, 32);
   foo = foo ^ 255;
 
