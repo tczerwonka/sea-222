@@ -12,9 +12,6 @@
 const int A_0 = 4;        	//23 - PC5
 const int A_1 = 3;        	//22 - PC6
 const int A_2 = 2;        	//21 - PC7
-const int SCKLOCAL = 7;        //33 moved from 13 to 8 as 13 has the led
-const int MOSILOCAL = 6;       //32
-const int MISOLOCAL = 5;       //31
 const int SpiEn = 8;     	//26
 const int CW = 10;      //clockwise switch -- 6
 const int CCW = 9;    //counterclockwise switch -- 5
@@ -25,8 +22,12 @@ const int BEEP = 24;      //9
 const int U3SW = 25;       //24
 const int PttIn = 26;      //36
 
-
-
+//moved to use hardware sck libraries
+//except for SCKLOCAL -- that hardware-wise is 32 but decided
+//to use the software SPI libs to relieve some wire banjo-stringing
+const int SCKLOCAL = 5;        //33 moved from 13 to 8 as 13 has the led
+const int MOSILOCAL = 0;       //32
+const int MISOLOCAL = 1;       //31
 
 
 
