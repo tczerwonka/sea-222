@@ -29,6 +29,9 @@ const int SCKLOCAL = 5;        //33 moved from 13 to 8 as 13 has the led
 const int MOSILOCAL = 0;       //32
 const int MISOLOCAL = 1;       //31
 
-
+//SSD1306 display 0x78
+//using hardware i2c
+//pin 19 for SCL0
+//pin 18 for SDA0
 
 #endif

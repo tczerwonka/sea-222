@@ -17,6 +17,16 @@
 #include "pindefs.h"
 #include "esp_macros.h"
 
+////////////////////////////////////////////////////////////////////////////////
+// for the SSD1306 display
+////////////////////////////////////////////////////////////////////////////////
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+#define SCREEN_ADDRESS 0x78
 
 
 
@@ -115,7 +125,7 @@ void loop() {
 
   delay(100);
 
-  if (frontPanelByte & 128) {
+  if (frontPanelByte == 128) {
     //scn
     setFrontPanel(RNGE, 1);
   }
@@ -123,19 +133,7 @@ void loop() {
     setFrontPanel(RNGE, 0);
   }
 
-
-/*
-  incomingByte = readFrontPanel();
-
-  if (incomingByte == 128) {
-    //scn
-    setFrontPanel(RNGE, 1);
-  } 
-  else {
-    setFrontPanel(RNGE, 0);
-  }
-
-  if (incomingByte == 2) {
+  if (frontPanelByte == 2) {
     //hrn
     //testfn();
     squelch(1);
@@ -143,7 +141,7 @@ void loop() {
   else {
     squelch(0);
   }
-*/
+
 
   delay(1000);
 } //loop
