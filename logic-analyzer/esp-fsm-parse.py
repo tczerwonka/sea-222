@@ -17,7 +17,7 @@ import sys
 ################################################################################
 #column defines
 ################################################################################
-file = 2
+file = 3
 
 #first
 if (file == 1):
@@ -35,6 +35,19 @@ if (file == 1):
 #Time [s],EN,SCK,MISO,MOSI,A0-23,A1-22,A2-21,Channel 7
 if (file == 2):
     logic_csv = 'turnon2.csv'
+    time_col = 0
+    main_spi_en = 1
+    SCK = 2
+    MISO = 3
+    MOSI = 4
+    A0 = 5
+    A1 = 6
+    A2 = 7
+    ch7 = 8
+
+#Time [s],EN,SCK,MISO,MOSI,A0-23,A1-22,A2-21,Channel 7
+if (file == 3):
+    logic_csv = 'turnon3.csv'
     time_col = 0
     main_spi_en = 1
     SCK = 2
