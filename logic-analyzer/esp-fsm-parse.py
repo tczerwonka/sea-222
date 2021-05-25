@@ -92,9 +92,9 @@ def read_logic_csv():
                     if ((row[A2] == '1') & (row[A1] == '0') & (row[A0] == '0')):
                         print("DSP_LATCH")
                     if ((row[A2] == '1') & (row[A1] == '0') & (row[A0] == '1')):
-                        print("UNDEFINED5-0")
+                        print("UNDEFINED5-0-DAC_EN - NO_SPI_EN")
                     if ((row[A2] == '1') & (row[A1] == '1') & (row[A0] == '0')):
-                        print("UNDEFINED6-0")
+                        print("UNDEFINED6-0 -SYN_EN - NO_SPI_EN")
                     if ((row[A2] == '1') & (row[A1] == '1') & (row[A0] == '1')):
                         print("UNDEFINED7-0")
                 if (row[main_spi_en] == '1'):
@@ -107,7 +107,7 @@ def read_logic_csv():
                     if ((row[A2] == '0') & (row[A1] == '1') & (row[A0] == '1')):
                         print("LED-DTMF-EN")
                     if ((row[A2] == '1') & (row[A1] == '0') & (row[A0] == '0')):
-                        print("UNDEFINED4-1")
+                        print("UNDEFINED4-1 SPI_EN+DSP_LATCH")
                     if ((row[A2] == '1') & (row[A1] == '0') & (row[A0] == '1')):
                         print("DAC_EN")
                     if ((row[A2] == '1') & (row[A1] == '1') & (row[A0] == '0')):
